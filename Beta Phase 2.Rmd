@@ -1,0 +1,47 @@
+---
+title: "Beta Phase 2"
+author: "BALA KRISHNA REDDY KESARI"
+date: "12/8/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+citibikedat <- read.csv("DC Bike Share.csv")
+install.packages("dplyr")
+install.packages("tidyr")
+install.packages("ggplot2")
+library(ggplot2)
+library (dplyr)
+library(tidyr)
+```
+
+```{r}
+## Average ride during the time of the day
+
+citibikedat <- citibikedat %>% separate( starttime, c("start.date", "start.time"), sep = " " )
+citibikedat <- citibikedat %>% separate( stoptime, c("stop.date", "stop.time"), sep = " " )
+head( citibikedat )
+
+ride <- citibikedat
+ride$start.time <- gsub( ":", "", ride$start.time )
+ride$start.time <- as.integer( ride$start.time )
+
+
+ride$stop.time <- gsub( ":", "", ride$stop.time )
+ride$stop.time <- as.integer( ride$stop.time )
+
+ride$period <- cut( ride$start.time, c( 0, 400, 800, 1200, 1600, 2000, 2400), labels = c("Midnight", "Early Morning", "Late Morning", "Afternoon", "Evening", "Night"), right=F)
+
+time_of_the_Day <- ride$period
+
+mean.ride <- group_by(ride, period) %>% summarize( mean(tripduration)/60 )
+mean.ride
+
+ride.time <- ggplot(data = citibikedat, aes(x=tripduration,, y=time_of_the_Day, size = mean.ride))
+ride.time+geom_point(size=1)
+```
+
